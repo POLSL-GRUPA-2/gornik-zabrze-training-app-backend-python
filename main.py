@@ -3,10 +3,14 @@ from flask import Flask
 from flask_restful import Resource, Api
 from flask_sqlalchemy import SQLAlchemy
 import pymysql
+import xml.etree.ElementTree as XMLconfig
+
+XMLtree = XMLconfig.parse('config.xml')
+XMLroot = XMLtree.getroot()
 
 app = Flask(__name__)
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://szef:rootroot@localhost/gornik"
+app.config['SQLALCHEMY_DATABASE_URI'] = XMLroot.find('database_string').text
 
 dataBase = SQLAlchemy(app)
 
