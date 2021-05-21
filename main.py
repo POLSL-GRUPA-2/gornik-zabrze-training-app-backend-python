@@ -1,4 +1,3 @@
-from datetime import timedelta
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_sqlalchemy import SQLAlchemy
@@ -8,9 +7,12 @@ import xml.etree.ElementTree as XMLconfig
 XMLtree = XMLconfig.parse('config.xml')
 XMLroot = XMLtree.getroot()
 
+dataBaseConfig = XMLroot.find('database')
+
 app = Flask(__name__)
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = XMLroot.find('database_string').text
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://{0}:{1}@{2}/{3}".format(dataBaseConfig.find('user').text,
+ dataBaseConfig.find('password').text, dataBaseConfig.find('host').text, dataBaseConfig.find('name').text )
 
 dataBase = SQLAlchemy(app)
 
