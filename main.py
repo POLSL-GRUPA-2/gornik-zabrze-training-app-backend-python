@@ -1,9 +1,8 @@
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_sqlalchemy import SQLAlchemy
-import pymysql
 import xml.etree.ElementTree as XMLconfig
-import json
+from flask_restful import reqparse
 
 XMLtree = XMLconfig.parse('config.xml')
 XMLroot = XMLtree.getroot()
@@ -18,33 +17,59 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://{0}:{1}@{2}/{3}".format
 dataBase = SQLAlchemy(app)
 
 class Serializable():
-    def as_dict(self):
+    def json(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class Users(dataBase.Model, Serializable):
     id = dataBase.Column("id", dataBase.Integer, primary_key=True)
-    firstname = dataBase.Column("firstname", dataBase.String(100))
-    lastname = dataBase.Column("lastname", dataBase.String(100))
+    first_name = dataBase.Column("first_name", dataBase.String(100))
+    last_name = dataBase.Column("last_name", dataBase.String(100))
     email = dataBase.Column("email", dataBase.String(100))
 
-    def __init__(self, firstname, lastname, email):
-        self.firstname = firstname
-        self.lastname = lastname
+    def __init__(self, first_name, last_name, email):
+        self.first_name = first_name
+        self.last_name = last_name
         self.email = email
 
+    parser = reqparse.RequestParser()
+    parser.add_argument('id', type=int, help='Id cannot be converted')
+    parser.add_argument('first_name')
+    parser.add_argument('last_name')
+    parser.add_argument('email')
 
-class HelloWorld(Resource):
+class UserRes(Resource):
+
+    def post(self):
+        return "post"
+
     def get(self):
         
-        print("aaaa")
-        us = Users.query.filter_by(firstname="Andrzej").first()
+        args = Users.parser.parse_args()
+
+        if(args['id'] == None):
+            users = Users.query.all()
+            jusers = []
+            for u in users:
+                jusers.append(u.json())
+            return jusers
+
+        us = Users.query.filter_by(id=args['id']).first()
 
         if us:
-            return us.as_dict()
+            return us.json()
         else:
             return "prrrrt"
 
-api.add_resource(HelloWorld, '/')
+    def put(self):
+        return "put"
+
+    def patch(self):
+        return "patch"
+
+    def delete(self):
+        return "delete"
+
+api.add_resource(UserRes, '/user')
 
 if __name__ == '__main__':
     dataBase.create_all()
