@@ -9,6 +9,8 @@ import jwt
 import datetime
 from functools import wraps
 
+from werkzeug.wrappers import Response
+
 #CONFIGURATION
 
 XMLtree = XMLconfig.parse('config.xml')
@@ -56,8 +58,8 @@ def token_required(f):
     def decorated(*args, **kwargs):
         token = None
 
-        if 'x-access-token' in request.headers:
-            token = request.headers['x-access-token']
+        if 'token' in request.cookies:
+            token = request.cookies['token']
 
         if not token:
             return jsonify({'message' : 'Token is missing'})
@@ -121,7 +123,9 @@ class Login(Resource):
         if check_password_hash(user.password_hash, auth.password):
             token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
 
-            return jsonify({'token' : token})
+            response = make_response({'Message' : 'Login successfull'})
+            response.set_cookie('token', token)
+            return response
         
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
@@ -142,11 +146,16 @@ class Register(Resource):
 
         return jsonify({'message' : 'User created successfully'})
         
-
+class Logout(Resource):
+    def get(self):
+        response = make_response({'Message' : 'Logout successfull'})
+        response.set_cookie('token', '', expires=0)
+        return response
 
 api.add_resource(UsersCRUD, '/user')
 api.add_resource(Login, '/login')
 api.add_resource(Register, '/register')
+api.add_resource(Logout, '/logout')
 
 if __name__ == '__main__':
     dataBase.create_all()
