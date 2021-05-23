@@ -9,8 +9,6 @@ import jwt
 import datetime
 from functools import wraps
 
-from werkzeug.wrappers import Response
-
 #CONFIGURATION
 
 XMLtree = XMLconfig.parse('config.xml')
