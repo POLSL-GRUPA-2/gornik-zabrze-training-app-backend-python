@@ -7,10 +7,12 @@ import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
+from functools import wraps
+
+#CONFIGURATION
 
 XMLtree = XMLconfig.parse('config.xml')
 XMLroot = XMLtree.getroot()
-
 dataBaseConfig = XMLroot.find('database')
 
 app = Flask(__name__)
@@ -24,6 +26,8 @@ dataBase = SQLAlchemy(app)
 class Serializable():
     def json(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+#MODELS
 
 class Users(dataBase.Model, Serializable):
     id = dataBase.Column("id", dataBase.String(100), primary_key=True)
@@ -45,12 +49,37 @@ class Users(dataBase.Model, Serializable):
     parser.add_argument('last_name')
     parser.add_argument('email')
 
-class UserRes(Resource):
+#DECORATORS
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return jsonify({'message' : 'Token is missing'})
+
+        try:
+            token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS512", "HS256"])
+            current_user = Users.query.filter_by(id=token_data['id']).first()
+        except:
+            return jsonify({'message' : 'Token is invalid!'})
+
+        return f(current_user, *args, **kwargs)
+    return decorated    
+
+#RESOURCES
+
+class UsersCRUD(Resource):
 
     def post(self):
         return "post"
 
-    def get(self):
+    @token_required
+    def get(current_user, self):
         
         args = Users.parser.parse_args()
 
@@ -90,7 +119,7 @@ class Login(Resource):
             return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
         if check_password_hash(user.password_hash, auth.password):
-            token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'])
+            token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
 
             return jsonify({'token' : token})
         
@@ -115,7 +144,7 @@ class Register(Resource):
         
 
 
-api.add_resource(UserRes, '/user')
+api.add_resource(UsersCRUD, '/user')
 api.add_resource(Login, '/login')
 api.add_resource(Register, '/register')
 
