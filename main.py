@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
 from functools import wraps
+from flask_cors import CORS
 
 #CONFIGURATION
 
@@ -17,6 +18,7 @@ dataBaseConfig = XMLroot.find('database')
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://{0}:{1}@{2}/{3}".format(dataBaseConfig.find('user').text,
  dataBaseConfig.find('password').text, dataBaseConfig.find('host').text, dataBaseConfig.find('name').text )
 app.config['SECRET_KEY'] = "EEAAA"
@@ -138,7 +140,7 @@ class Register(Resource):
 
         hashed_password = generate_password_hash(data['password'], method='sha256')
 
-        new_user = Users(id=str(uuid.uuid1()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password)
+        new_user = Users(id=str(uuid.uuid4()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password)
         dataBase.session.add(new_user)
         dataBase.session.commit()
 
