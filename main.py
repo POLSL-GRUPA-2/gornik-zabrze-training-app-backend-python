@@ -109,18 +109,18 @@ class UsersCRUD(Resource):
         return "delete"
 
 class Login(Resource):
-    def get(self):
+    def post(self):
         
-        auth = request.authorization
-        if not auth or not auth.username or not auth.password:
+        auth = request.get_json()
+        if not auth or not auth['email'] or not auth['password']:
             return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-        user = Users.query.filter_by(email=auth.username).first()
+        user = Users.query.filter_by(email=auth['email']).first()
 
         if not user:
             return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-        if check_password_hash(user.password_hash, auth.password):
+        if check_password_hash(user.password_hash, auth['password']):
             token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
 
             response = make_response({'Message' : 'Login successfull'})
