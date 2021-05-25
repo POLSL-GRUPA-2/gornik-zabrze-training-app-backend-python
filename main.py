@@ -18,7 +18,7 @@ dataBaseConfig = XMLroot.find('database')
 
 app = Flask(__name__)
 api = Api(app)
-CORS(app)
+CORS(app, supports_credentials=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://{0}:{1}@{2}/{3}".format(dataBaseConfig.find('user').text,
  dataBaseConfig.find('password').text, dataBaseConfig.find('host').text, dataBaseConfig.find('name').text )
 app.config['SECRET_KEY'] = "EEAAA"
@@ -124,8 +124,7 @@ class Login(Resource):
             token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
 
             response = make_response({'Message' : 'Login successfull'})
-            response.set_cookie('token', token)
-            response.headers['Access-Control-Allow-Origin'] = 'true'
+            response.set_cookie('token', token, httponly = True, secure=True)
             return response
         
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
