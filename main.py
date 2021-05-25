@@ -125,6 +125,7 @@ class Login(Resource):
 
             response = make_response({'Message' : 'Login successfull'})
             response.set_cookie('token', token)
+            response.headers['Access-Control-Allow-Origin'] = 'true'
             return response
         
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
@@ -150,6 +151,7 @@ class Logout(Resource):
     def get(self):
         response = make_response({'Message' : 'Logout successfull'})
         response.set_cookie('token', '', expires=0)
+        response.headers['Access-Control-Allow-Origin'] = 'true'
         return response
 
 api.add_resource(UsersCRUD, '/user')
