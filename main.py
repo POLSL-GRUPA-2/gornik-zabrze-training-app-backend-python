@@ -9,6 +9,7 @@ import jwt
 import datetime
 from functools import wraps
 from flask_cors import CORS
+from werkzeug.wrappers import Response
 
 #CONFIGURATION
 
@@ -153,10 +154,17 @@ class Logout(Resource):
         response.headers['Access-Control-Allow-Origin'] = 'true'
         return response
 
+class Account(Resource):
+    @token_required
+    def get(current_user, self):
+        return current_user.json()
+
+
 api.add_resource(UsersCRUD, '/user')
 api.add_resource(Login, '/login')
 api.add_resource(Register, '/register')
 api.add_resource(Logout, '/logout')
+api.add_resource(Account, '/account')
 
 if __name__ == '__main__':
     dataBase.create_all()
