@@ -5,3 +5,4 @@ flask-cors
 werkzeug
 jwt
 gunicorn
+pymysql
