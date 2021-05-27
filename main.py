@@ -14,10 +14,6 @@ from boto.s3.connection import S3Connection
 
 #CONFIGURATION
 
-XMLtree = XMLconfig.parse('config.xml')
-XMLroot = XMLtree.getroot()
-dataBaseConfig = XMLroot.find('database')
-
 app = Flask(__name__)
 api = Api(app)
 CORS(app, supports_credentials=True)
