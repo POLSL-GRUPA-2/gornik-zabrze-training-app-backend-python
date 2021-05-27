@@ -114,12 +114,12 @@ class Login(Resource):
         
         auth = request.get_json()
         if not auth or not auth['email'] or not auth['password']:
-            return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+            return make_response('Could not verify1', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
         user = Users.query.filter_by(email=auth['email']).first()
 
         if not user:
-            return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+            return make_response('Could not verify2', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
         if check_password_hash(user.password_hash, auth['password']):
             token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
@@ -128,7 +128,7 @@ class Login(Resource):
             response.set_cookie('token', token, httponly = True, secure=True)
             return response
         
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        return make_response('Could not verify3', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 class Register(Resource):
     def post(self):
