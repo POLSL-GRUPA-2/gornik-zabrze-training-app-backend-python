@@ -1,1 +1,1 @@
-web: gunicorn main:main --preload
+web: gunicorn --workers=3 main:main --timeout 1000 --log-file -
