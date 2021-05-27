@@ -167,5 +167,5 @@ api.add_resource(Dupa, '/')
 
 def main(*args, **kwargs):
     dataBase.create_all()
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=33507)
 
