@@ -71,6 +71,10 @@ def token_required(f):
 
 #RESOURCES
 
+class Dupa(Resource):
+    def get(self):
+        return "spierdlaj"
+
 class UsersCRUD(Resource):
 
     def post(self):
@@ -159,6 +163,7 @@ api.add_resource(Login, '/login')
 api.add_resource(Register, '/register')
 api.add_resource(Logout, '/logout')
 api.add_resource(Account, '/account')
+api.add_resource(Dupa, '/')
 
 def main():
     dataBase.create_all()
