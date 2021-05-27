@@ -29,6 +29,7 @@ class Serializable():
 #MODELS
 
 class Users(dataBase.Model, Serializable):
+    __tablename__='Users'
     id = dataBase.Column("id", dataBase.String(100), primary_key=True)
     first_name = dataBase.Column("first_name", dataBase.String(100))
     last_name = dataBase.Column("last_name", dataBase.String(100))
@@ -121,7 +122,7 @@ class Login(Resource):
         if not user:
             return make_response('Could not verify2', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-        print(user)
+        print(user.password_hash)
         if check_password_hash(user.password_hash, auth['password']):
             token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
 
