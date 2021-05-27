@@ -9,6 +9,7 @@ import jwt
 import datetime
 from functools import wraps
 from flask_cors import CORS
+from boto.s3.connection import S3Connection
 
 
 #CONFIGURATION
@@ -20,8 +21,7 @@ dataBaseConfig = XMLroot.find('database')
 app = Flask(__name__)
 api = Api(app)
 CORS(app, supports_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://{0}:{1}@{2}/{3}".format(dataBaseConfig.find('user').text,
- dataBaseConfig.find('password').text, dataBaseConfig.find('host').text, dataBaseConfig.find('name').text )
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://szef:rootroot@localhost/gornik"
 app.config['SECRET_KEY'] = "EEAAA"
 
 dataBase = SQLAlchemy(app)
