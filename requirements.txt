@@ -3,6 +3,6 @@ flask-sqlalchemy
 flask-restful
 flask-cors
 werkzeug
-jwt
+pyjwt
 gunicorn
 pymysql
