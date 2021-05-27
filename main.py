@@ -169,5 +169,5 @@ api.add_resource(Dupa, '/')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0')
+    #app.run(debug=False, host='0.0.0.0')
 
