@@ -1,6 +1,7 @@
 flask
 flask-sqlalchemy
 flask-restful
+flask-cors
 werkzeug
 jwt
 gunicorn
