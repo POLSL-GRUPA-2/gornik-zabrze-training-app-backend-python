@@ -171,3 +171,7 @@ def main(*args, **kwargs):
     #port = int(os.environ.get('PORT', 5000))
     #app.run(debug=False, host='0.0.0.0')
 
+if __name__ == '__main__':
+    main()
+else:
+    gmain = main()
