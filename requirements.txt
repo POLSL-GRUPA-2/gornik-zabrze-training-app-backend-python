@@ -6,4 +6,4 @@ werkzeug
 jwt
 gunicorn
 pymysql
-gunicorn[eventlet]
+eventlet
