@@ -121,12 +121,13 @@ class Login(Resource):
         if not user:
             return make_response('Could not verify2', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-        #if check_password_hash(user.password_hash, auth['password']):
-        token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
+        print(user)
+        if check_password_hash(user.password_hash, auth['password']):
+            token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
 
-        response = make_response({'Message' : 'Login successfull'})
-        response.set_cookie('token', token, httponly = True, secure=True)
-        return response
+            response = make_response({'Message' : 'Login successfull'})
+            response.set_cookie('token', token, httponly = True, secure=True)
+            return response
         
         return make_response('Could not verify3', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
