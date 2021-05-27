@@ -9,7 +9,6 @@ import jwt
 import datetime
 from functools import wraps
 from flask_cors import CORS
-from boto.s3.connection import S3Connection
 
 
 #CONFIGURATION
