@@ -165,10 +165,7 @@ api.add_resource(Logout, '/logout')
 api.add_resource(Account, '/account')
 api.add_resource(Dupa, '/')
 
-def main():
+def main(*args, **kwargs):
     dataBase.create_all()
     app.run(debug=True)
 
-
-if __name__ == '__main__':
-    main()
