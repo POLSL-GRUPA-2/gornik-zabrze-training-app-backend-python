@@ -127,7 +127,7 @@ class Login(Resource):
             token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm="HS512")
 
             response = make_response({'Message' : 'Login successfull'})
-            response.set_cookie('token', token, httponly = True, samesite=None)
+            response.set_cookie('token', token, httponly = True, samesite="None")
             return response
         
         return make_response('Could not verify3', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
