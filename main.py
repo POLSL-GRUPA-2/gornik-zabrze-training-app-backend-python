@@ -166,6 +166,10 @@ api.add_resource(Logout, '/logout')
 api.add_resource(Account, '/account')
 api.add_resource(Dupa, '/')
 
+
+
+
+
 def main(*args, **kwargs):
     dataBase.create_all()
     port = int(os.environ.get('PORT', 5000))
