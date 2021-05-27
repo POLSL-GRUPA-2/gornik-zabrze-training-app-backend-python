@@ -151,7 +151,6 @@ class Logout(Resource):
     def get(self):
         response = make_response({'Message' : 'Logout successfull'})
         response.set_cookie('token', '', expires=0)
-        response.headers['Access-Control-Allow-Origin'] = 'true'
         return response
 
 class Account(Resource):
