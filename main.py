@@ -9,7 +9,7 @@ import jwt
 import datetime
 from functools import wraps
 from flask_cors import CORS
-from werkzeug.wrappers import Response
+
 
 #CONFIGURATION
 
@@ -166,6 +166,10 @@ api.add_resource(Register, '/register')
 api.add_resource(Logout, '/logout')
 api.add_resource(Account, '/account')
 
-if __name__ == '__main__':
+def main():
     dataBase.create_all()
     app.run(debug=True)
+
+
+if __name__ == '__main__':
+    main()
