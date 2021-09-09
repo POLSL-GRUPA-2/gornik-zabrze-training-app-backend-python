@@ -17,7 +17,7 @@ import os
 app = Flask(__name__)
 api = Api(app)
 CORS(app, supports_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://sql11415331:XVAaPJQ7If@sql11.freemysqlhosting.net:3306/sql11415331"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://sql11435848:zLDlIiFegD@sql11.freemysqlhosting.net:3306/sql11435848"
 app.config['SECRET_KEY'] = "EEAAA"
 
 dataBase = SQLAlchemy(app)
