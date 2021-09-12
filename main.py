@@ -12,6 +12,8 @@ from flask_cors import CORS
 import os
 
 
+#dup
+
 #CONFIGURATION
 
 app = Flask(__name__)
@@ -48,6 +50,37 @@ class Users(dataBase.Model, Serializable):
     parser.add_argument('first_name')
     parser.add_argument('last_name')
     parser.add_argument('email')
+
+class Coach(dataBase.Model, Serializable):
+    id = dataBase.Column("id", dataBase.Integer, primary_key=True)
+    user_id = dataBase.Column("user_id", dataBase.dataBase.String(255), dataBase.ForeignKey('user.id'), nullable=False)
+    
+    teams = dataBase.relationship('Team', backref='coach', lazy=True)
+
+    parser = reqparse.RequestParser()
+    parser.add_argument('id')
+    parser.add_argument('user_id')
+
+class Team(dataBase.Model, Serializable):
+    id = dataBase.Column("id", dataBase.Integer, primary_key=True)
+    coach_id = dataBase.Column("coach_id", dataBase.Integer, dataBase.ForeignKey('coach.id'), nullable=False)
+
+    players = dataBase.relationship('Player', backref='team', lazy=True)
+
+    parser = reqparse.RequestParser()
+    parser.add_argument('id')
+    parser.add_argument('coach_id')
+
+class Player(dataBase.Model, Serializable):
+    id = dataBase.Comlumn("id", dataBase.Integer, primary_key=True)
+    team_id = dataBase.Column("team_id", dataBase.Integer, dataBase.ForeignKey('team.id'), nullable=False) 
+    user_id = dataBase.Column("user_id", dataBase.dataBase.String(255), dataBase.ForeignKey('user.id'), nullable=False) 
+
+    parser = reqparse.RequestParser()
+    parser.add_argument('id')
+    parser.add_argument('team_id')
+    parser.add_argument('user_id')
+
 
 #DECORATORS
 
@@ -110,6 +143,56 @@ class UsersCRUD(Resource):
     def delete(self):
         return "delete"
 
+class TeamCRUD(Resource):
+    def post(self):
+        return "post"
+
+    def get(self):
+        return "get"
+
+    def put(self):
+        return "put"
+
+    def patch(self):
+        return "patch"
+
+    def delete(self):
+        return "delete"
+
+#???/XD
+class CoachCRUD(Resource):
+    def post(self):
+        return "post"
+
+    def get(self):
+        return "get"
+
+    def put(self):
+        return "put"
+
+    def patch(self):
+        return "patch"
+
+    def delete(self):
+        return "delete"
+
+class PlayerCRUD(Resource):
+    def post(self):
+        return "post"
+
+    def get(self):
+        return "get"
+
+    def put(self):
+        return "put"
+
+    def patch(self):
+        return "patch"
+
+    def delete(self):
+        return "delete"
+
+
 class Login(Resource):
     def post(self):
         
@@ -162,6 +245,9 @@ class Account(Resource):
 
 
 api.add_resource(UsersCRUD, '/user')
+api.add_resource(CoachCRUD, '/coach')
+api.add_resource(PlayerCRUD, '/player')
+api.add_resource(TeamCRUD, '/team')
 api.add_resource(Login, '/login')
 api.add_resource(Register, '/register')
 api.add_resource(Logout, '/logout')
@@ -171,7 +257,7 @@ api.add_resource(Dupa, '/')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=False, host='0.0.0.0')
+    app.run(debug=False)
 
 if __name__ == '__main__':
     main()
