@@ -616,23 +616,50 @@ class MessageCRUD(Resource):
         else:
             return jsonify({'message' : 'Don\'t be retard'})  
         
-
-
 class TeamMessageCRUD(Resource):
-    def post(self):
-        return "post"
+    @token_required
+    def post(current_user, self):
 
-    def get(self):
-        return "get"
+        data = request.get_json()
 
-    def put(self):
-        return "put"
+        sender_id = current_user.id
+        team_id = data['team_id']
+        message = data['message']
 
-    def patch(self):
-        return "patch"
+        valid = False
+        for t in current_user.player[0].teams:
+            if t.team.id == int(team_id):
+                valid = True
+        
+        if valid:
+            if len(message) > 2049:
+                return jsonify({'message' : 'Message too long'})  
+            time_stamp = datetime.now()
 
-    def delete(self):
-        return "delete"    
+            new_message = TeamMessages(id=None, team_id=team_id, sender_id=sender_id, message=message, time_stamp=time_stamp)
+            dataBase.session.add(new_message)
+            dataBase.session.commit()
+            return jsonify({'message' : 'Message succesfully added'})  
+        else:
+            return jsonify({'message' : 'Don\'t be retard'})  
+
+    @token_required
+    def get(current_user, self):
+
+        team_id = request.args.get('team_id')
+
+        valid = False
+        for t in current_user.player[0].teams:
+            if t.team.id == int(team_id):
+                valid = True
+
+        if valid:
+            if team_id is not None:
+                messages = TeamMessages.query.filter(TeamMessages.team_id == team_id).order_by(TeamMessages.time_stamp).all()
+            
+            return serialize_list(messages)
+        else:
+            return jsonify({'message' : 'Don\'t be retard'})    
 
 
 class Login(Resource):
@@ -695,6 +722,7 @@ api.add_resource(PlayerCRUD, '/player')
 api.add_resource(TeamCRUD, '/team')
 api.add_resource(PersonalTasksCRUD, '/personal_task')
 api.add_resource(MessageCRUD, '/message')
+api.add_resource(TeamMessageCRUD, '/team_message')
 
 api.add_resource(Login, '/login') #post
 api.add_resource(Register, '/register') #post
@@ -710,7 +738,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='localhost')
 
 if __name__ == '__main__':
     main()
