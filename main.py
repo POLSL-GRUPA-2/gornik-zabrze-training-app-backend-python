@@ -538,18 +538,18 @@ class TeamTasksCRUD(Resource):
             return personal_tasks.json()
 
         if start_date is not None and end_date is not None and team_id is not None:
-            start = datetime.strptime(start_date, '%Y-%m-%d')
-            end = datetime.strptime(end_date, '%Y-%m-%d')
+            start = datetime.strptime(start_date, '%Y-%m-%d-%h:%m:%s')
+            end = datetime.strptime(end_date, '%Y-%m-%d-%h:%m:%s')
             personal_tasks = TeamTasks.query.filter(TeamTasks.task_date >= start, TeamTasks.task_date <= end, TeamTasks.team_id == team_id).all()
             return serialize_list(personal_tasks)
 
         if task_date is not None and team_id is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d')
+            date = datetime.strptime(task_date, '%Y-%m-%d-%h:%m:%s')
             personal_tasks = TeamTasks.query.filter(TeamTasks.task_date == date, TeamTasks.team_id == team_id).all()
             return serialize_list(personal_tasks)
 
         if task_date is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d')
+            date = datetime.strptime(task_date, '%Y-%m-%d-%h:%m:%s')
             personal_tasks = TeamTasks.query.filter(TeamTasks.task_date == date).all()
             return serialize_list(personal_tasks)
 
@@ -742,7 +742,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='localhost')
+    #app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
