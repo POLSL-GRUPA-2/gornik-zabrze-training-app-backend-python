@@ -433,7 +433,7 @@ class PersonalTasksCRUD(Resource):
         if current_user.role.id < 2:
             return jsonify({'message' : 'Access denied'}) 
         data = request.get_json()
-        date = datetime.strptime(data['task_date'], '%Y-%m-%d')
+        date = datetime.strptime(data['task_date'], '%Y-%m-%d %h:%m:%s')
 
         new_task = PersonalTasks(id=None, task_date=date, coach_id=data['coach_id'], player_id=data['player_id'], description=data['description'], done=False)
         dataBase.session.add(new_task)
@@ -454,18 +454,21 @@ class PersonalTasksCRUD(Resource):
             return personal_tasks.json()
 
         if start_date is not None and end_date is not None and player_id is not None:
-            start = datetime.strptime(start_date, '%Y-%m-%d')
-            end = datetime.strptime(end_date, '%Y-%m-%d')
-            personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date >= start, PersonalTasks.task_date <= end, PersonalTasks.player_id == player_id).all()
-            return serialize_list(personal_tasks)
+            try:
+                start = datetime.strptime(start_date, '%Y-%m-%d %h:%m:%s')
+                end = datetime.strptime(end_date, '%Y-%m-%d %h:%m:%s')
+                personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date >= start, PersonalTasks.task_date <= end, PersonalTasks.player_id == player_id).all()
+                return serialize_list(personal_tasks)
+            except:
+                return jsonify({'message' : 'Task succesfully failed'})  
             
         if task_date is not None and player_id is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d')
+            date = datetime.strptime(task_date, '%Y-%m-%d %h:%m:%s')
             personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date == date, PersonalTasks.player_id == player_id).all()
             return serialize_list(personal_tasks)
 
         if task_date is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d')
+            date = datetime.strptime(task_date, '%Y-%m-%d %h:%m:%s')
             personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date == date).all()
             return serialize_list(personal_tasks)
         
@@ -739,6 +742,7 @@ def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
     #app.run(debug=True, host='0.0.0.0')
+    
 
 if __name__ == '__main__':
     main()
