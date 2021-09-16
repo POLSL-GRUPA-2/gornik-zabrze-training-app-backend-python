@@ -55,12 +55,13 @@ class Users(dataBase.Model, Serializable):
     messages_recieved = dataBase.relationship('Messages', backref='reciever', foreign_keys='Messages.reciever_id', lazy=True)
     team_message_sent = dataBase.relationship('TeamMessages', backref='sender', foreign_keys='TeamMessages.sender_id', lazy=True)
 
-    def __init__(self, id, first_name, last_name, email, password_hash):
+    def __init__(self, id, first_name, last_name, email, password_hash, role_id):
         self.id = id
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.password_hash = password_hash
+        self.role_id = role_id
 
     def json(self):
         return {
@@ -455,20 +456,20 @@ class PersonalTasksCRUD(Resource):
 
         if start_date is not None and end_date is not None and player_id is not None:
             try:
-                start = datetime.strptime(start_date, '%Y-%m-%d %h:%m:%s')
-                end = datetime.strptime(end_date, '%Y-%m-%d %h:%m:%s')
+                start = datetime.strptime(start_date, '%Y-%m-%d-%h:%m:%s')
+                end = datetime.strptime(end_date, '%Y-%m-%d-%h:%m:%s')
                 personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date >= start, PersonalTasks.task_date <= end, PersonalTasks.player_id == player_id).all()
                 return serialize_list(personal_tasks)
             except:
                 return jsonify({'message' : 'Task succesfully failed'})  
             
         if task_date is not None and player_id is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d %h:%m:%s')
+            date = datetime.strptime(task_date, '%Y-%m-%d-%h:%m:%s')
             personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date == date, PersonalTasks.player_id == player_id).all()
             return serialize_list(personal_tasks)
 
         if task_date is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d %h:%m:%s')
+            date = datetime.strptime(task_date, '%Y-%m-%d-%h:%m:%s')
             personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date == date).all()
             return serialize_list(personal_tasks)
         
@@ -698,7 +699,7 @@ class Register(Resource):
 
         hashed_password = generate_password_hash(data['password'], method='sha256')
 
-        new_user = Users(id=str(uuid.uuid4()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password)
+        new_user = Users(id=str(uuid.uuid4()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password, role=1)
         dataBase.session.add(new_user)
         dataBase.session.commit()
 
@@ -741,7 +742,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='localhost')
     
 
 if __name__ == '__main__':
