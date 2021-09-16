@@ -455,21 +455,19 @@ class PersonalTasksCRUD(Resource):
             return personal_tasks.json()
 
         if start_date is not None and end_date is not None and player_id is not None:
-            try:
-                start = datetime.strptime(start_date, '%Y-%m-%d-%h:%m:%s')
-                end = datetime.strptime(end_date, '%Y-%m-%d-%h:%m:%s')
-                personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date >= start, PersonalTasks.task_date <= end, PersonalTasks.player_id == player_id).all()
-                return serialize_list(personal_tasks)
-            except:
-                return jsonify({'message' : 'Task succesfully failed'})  
+
+            start = datetime.strptime(start_date, '%Y-%m-%d-%H:%M:%S')
+            end = datetime.strptime(end_date, '%Y-%m-%d-%H:%M:%S')
+            personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date >= start, PersonalTasks.task_date <= end, PersonalTasks.player_id == player_id).all()
+            return serialize_list(personal_tasks)
             
         if task_date is not None and player_id is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d-%h:%m:%s')
+            date = datetime.strptime(task_date, '%Y-%m-%d-%H:%M:%S')
             personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date == date, PersonalTasks.player_id == player_id).all()
             return serialize_list(personal_tasks)
 
         if task_date is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d-%h:%m:%s')
+            date = datetime.strptime(task_date, '%Y-%m-%d-%H:%M:%S')
             personal_tasks = PersonalTasks.query.filter(PersonalTasks.task_date == date).all()
             return serialize_list(personal_tasks)
         
@@ -488,7 +486,7 @@ class PersonalTasksCRUD(Resource):
 
         task = PersonalTasks.query.filter_by(id=data['id']).first()
         if current_user.role.id >=  2:
-            task.task_date = datetime.strptime(data['task_date'], '%Y-%m-%d')
+            task.task_date = datetime.strptime(data['task_date'], '%Y-%m-%d-%H:%M:%S')
             task.coach_id = data['coach_id']
             task.player_id = data['player_id']
             task.description = data['description']
@@ -517,7 +515,7 @@ class TeamTasksCRUD(Resource):
         if current_user.role.id < 2:
             return jsonify({'message' : 'Access denied'}) 
         data = request.get_json()
-        date = datetime.strptime(data['task_date'], '%Y-%m-%d')
+        date = datetime.strptime(data['task_date'], '%Y-%m-%d-%H:%M:%S')
 
         new_task = TeamTasks(id=None, task_date=date, coach_id=data['coach_id'], player_id=data['player_id'], description=data['description'], done=False)
         dataBase.session.add(new_task)
@@ -538,18 +536,18 @@ class TeamTasksCRUD(Resource):
             return personal_tasks.json()
 
         if start_date is not None and end_date is not None and team_id is not None:
-            start = datetime.strptime(start_date, '%Y-%m-%d-%h:%m:%s')
-            end = datetime.strptime(end_date, '%Y-%m-%d-%h:%m:%s')
+            start = datetime.strptime(start_date, '%Y-%m-%d-%H:%M:%S')
+            end = datetime.strptime(end_date, '%Y-%m-%d-%H:%M:%S')
             personal_tasks = TeamTasks.query.filter(TeamTasks.task_date >= start, TeamTasks.task_date <= end, TeamTasks.team_id == team_id).all()
             return serialize_list(personal_tasks)
 
         if task_date is not None and team_id is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d-%h:%m:%s')
+            date = datetime.strptime(task_date, '%Y-%m-%d-%H:%M:%S')
             personal_tasks = TeamTasks.query.filter(TeamTasks.task_date == date, TeamTasks.team_id == team_id).all()
             return serialize_list(personal_tasks)
 
         if task_date is not None:
-            date = datetime.strptime(task_date, '%Y-%m-%d-%h:%m:%s')
+            date = datetime.strptime(task_date, '%Y-%m-%d-%H:%M:%S')
             personal_tasks = TeamTasks.query.filter(TeamTasks.task_date == date).all()
             return serialize_list(personal_tasks)
 
