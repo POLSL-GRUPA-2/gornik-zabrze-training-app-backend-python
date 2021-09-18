@@ -642,7 +642,7 @@ class TeamMessageCRUD(Resource):
                 return jsonify({'message' : 'Message too long'})  
             time_stamp = datetime.now()
 
-            new_message = TeamMessages(id=None, team_id=team_id, sender_id=sender_id, message=message, time_stamp=time_stamp, role_id=1)
+            new_message = TeamMessages(id=None, team_id=team_id, sender_id=sender_id, message=message, time_stamp=time_stamp)
             dataBase.session.add(new_message)
             dataBase.session.commit()
             return jsonify({'message' : 'Message succesfully added'})  
@@ -701,7 +701,7 @@ class Register(Resource):
 
         hashed_password = generate_password_hash(data['password'], method='sha256')
 
-        new_user = Users(id=str(uuid.uuid4()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password)
+        new_user = Users(id=str(uuid.uuid4()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password, role_id=1)
         dataBase.session.add(new_user)
         dataBase.session.commit()
 
