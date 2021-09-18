@@ -701,7 +701,7 @@ class Register(Resource):
 
         hashed_password = generate_password_hash(data['password'], method='sha256')
 
-        new_user = Users(id=str(uuid.uuid4()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password, role=1)
+        new_user = Users(id=str(uuid.uuid4()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password, role=None)
         dataBase.session.add(new_user)
         dataBase.session.commit()
 
