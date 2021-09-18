@@ -773,7 +773,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='localhost')
+    #app.run(debug=True, host='localhost')
     
 
 if __name__ == '__main__':
