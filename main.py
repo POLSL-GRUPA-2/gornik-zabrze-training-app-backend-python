@@ -523,7 +523,7 @@ class TeamTasksCRUD(Resource):
         return jsonify({'message' : 'Task succesfully added'})  
 
     @token_required
-    def get(self):
+    def get(current_user, self):
         task_id = request.args.get('task_id')
         task_date = request.args.get('task_date')
         team_id = request.args.get('team_id')
