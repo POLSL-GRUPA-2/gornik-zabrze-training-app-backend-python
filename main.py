@@ -626,8 +626,7 @@ class MessageCRUD(Resource):
             messages_recv = dataBase.session.query(Users.first_name, Users.last_name, Messages.message, Messages.sender_id, func.max(Messages.time_stamp)).filter(Messages.reciever_id == user_id, Users.id == Messages.sender_id ).group_by(Messages.sender_id).order_by(func.max(Messages.time_stamp).desc()).all()
 
             print(messages_recv)
-
-            json_resp = '['
+            messes = []
 
             for m in messages_recv:
                 mess = {}
@@ -636,12 +635,9 @@ class MessageCRUD(Resource):
                 mess['message'] = m[2]
                 mess['from_id'] = m[3]
                 mess['date'] = str(m[4])
-                json_resp += json.dumps(mess)
-                json_resp += ','
-            json_resp = json_resp[:-1]
-            json_resp += ']'
+                messes.append(mess)
 
-            return json_resp
+            return jsonify(messes)
 
         if current_user.id == reciever_id or current_user.id == sender_id:
             if sender_id is not None and reciever_id is not None:
@@ -774,7 +770,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='localhost')
+    #app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
