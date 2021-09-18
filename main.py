@@ -642,7 +642,7 @@ class TeamMessageCRUD(Resource):
                 return jsonify({'message' : 'Message too long'})  
             time_stamp = datetime.now()
 
-            new_message = TeamMessages(id=None, team_id=team_id, sender_id=sender_id, message=message, time_stamp=time_stamp)
+            new_message = TeamMessages(id=None, team_id=team_id, sender_id=sender_id, message=message, time_stamp=time_stamp, role_id=1)
             dataBase.session.add(new_message)
             dataBase.session.commit()
             return jsonify({'message' : 'Message succesfully added'})  
