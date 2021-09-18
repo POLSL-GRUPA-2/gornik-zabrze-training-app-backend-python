@@ -393,7 +393,11 @@ class CoachCRUD(Resource):
         return "post"
 
     def get(self):
-        return "get"
+        user_id = request.args.get('user_id')
+        
+        if user_id is not None:
+            coach = Coaches.query.filter_by(user_id=user_id).first()
+            return coach.json()
 
     def put(self):
         return "put"
