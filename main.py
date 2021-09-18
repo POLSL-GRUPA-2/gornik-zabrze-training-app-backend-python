@@ -4,9 +4,11 @@ from flask.helpers import make_response
 from flask.signals import request_started
 from flask_restful import Resource, Api, reqparse
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import asc, desc, func
 import xml.etree.ElementTree as XMLconfig
 import uuid
 from sqlalchemy.orm import backref
+from sqlalchemy.sql.elements import True_
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
@@ -435,7 +437,7 @@ class PlayerCRUD(Resource):
 class PersonalTasksCRUD(Resource):
     @token_required
     def post(current_user, self):
-        if current_user.role.id < 2:
+        if current_user.role_id < 2:
             return jsonify({'message' : 'Access denied'}) 
         data = request.get_json()
         date = datetime.strptime(data['task_date'], '%Y-%m-%d %h:%m:%s')
@@ -516,7 +518,7 @@ class PersonalTasksCRUD(Resource):
 class TeamTasksCRUD(Resource):
     @token_required
     def post(current_user, self):
-        if current_user.role.id < 2:
+        if current_user.role_id < 2:
             return jsonify({'message' : 'Access denied'}) 
         data = request.get_json()
         date = datetime.strptime(data['task_date'], '%Y-%m-%d-%H:%M:%S')
@@ -617,6 +619,28 @@ class MessageCRUD(Resource):
 
         reciever_id = request.args.get('reciever_id')
         sender_id = request.args.get('sender_id')
+        user_id = request.args.get('user_id')
+
+        if user_id is not None:
+
+            messages_recv = dataBase.session.query(Users.first_name, Users.last_name, Messages.message, Messages.sender_id, func.max(Messages.time_stamp)).filter(Messages.reciever_id == user_id, Users.id == Messages.sender_id ).group_by(Messages.sender_id).order_by(func.max(Messages.time_stamp).desc()).all()
+
+            print(messages_recv)
+
+            json_resp = '['
+
+            for m in messages_recv:
+                mess = {}
+                mess['first_name'] = m[0]
+                mess['last_name'] = m[1]
+                mess['message'] = m[2]
+                mess['from_id'] = m[3]
+                mess['date'] = str(m[4])
+                json_resp += json.dumps(mess)
+            
+            json_resp += ']'
+
+            return json_resp
 
         if current_user.id == reciever_id or current_user.id == sender_id:
             if sender_id is not None and reciever_id is not None:
@@ -749,7 +773,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='localhost')
     
 
 if __name__ == '__main__':
