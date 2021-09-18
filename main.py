@@ -529,7 +529,7 @@ class TeamTasksCRUD(Resource):
         team_id = request.args.get('team_id')
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
-
+        coach_id = request.args.get('coach_id')
 
         if task_id is not None:
             personal_tasks = TeamTasks.query.filter(TeamTasks.id == task_id).all()
@@ -539,6 +539,10 @@ class TeamTasksCRUD(Resource):
             start = datetime.strptime(start_date, '%Y-%m-%d-%H:%M:%S')
             end = datetime.strptime(end_date, '%Y-%m-%d-%H:%M:%S')
             personal_tasks = TeamTasks.query.filter(TeamTasks.task_date >= start, TeamTasks.task_date <= end, TeamTasks.team_id == team_id).all()
+            return serialize_list(personal_tasks)
+
+        if coach_id is not None:
+            personal_tasks = TeamTasks.query.join(TeamTasks.team).filter(Teams.coach_id == coach_id).all()
             return serialize_list(personal_tasks)
 
         if task_date is not None and team_id is not None:
@@ -723,6 +727,7 @@ api.add_resource(CoachCRUD, '/coach')
 api.add_resource(PlayerCRUD, '/player')
 api.add_resource(TeamCRUD, '/team')
 api.add_resource(PersonalTasksCRUD, '/personal_task')
+api.add_resource(TeamTasksCRUD, '/team_task')
 api.add_resource(MessageCRUD, '/message')
 api.add_resource(TeamMessageCRUD, '/team_message')
 
@@ -740,7 +745,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='localhost')
+    #app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
