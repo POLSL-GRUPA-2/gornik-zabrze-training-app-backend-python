@@ -638,7 +638,7 @@ class MessageCRUD(Resource):
                 mess['date'] = str(m[4])
                 json_resp += json.dumps(mess)
                 json_resp += ','
-            
+            json_resp = json_resp[:-1]
             json_resp += ']'
 
             return json_resp
