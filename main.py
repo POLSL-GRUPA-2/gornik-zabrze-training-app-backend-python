@@ -468,7 +468,7 @@ class PlayerCRUD(Resource):
         query = Players.query.filter_by(user_id=user_id).first()
         if not query:
             if user:
-                new_coach = Players(id = None, user_id=user_id, teams=None)
+                new_coach = Players(id = None, user_id=user_id, teams=[])
                 dataBase.session.add(new_coach)
                 dataBase.session.commit()
                 return jsonify({'message' : 'User promoted to player'})  
