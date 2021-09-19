@@ -3,6 +3,7 @@ from flask.globals import session
 from flask.helpers import make_response
 from flask.signals import request_started
 from flask_restful import Resource, Api, reqparse
+from flask import Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import asc, desc, func
 import xml.etree.ElementTree as XMLconfig
@@ -307,11 +308,8 @@ def token_required(f):
 
 class UsersCRUD(Resource):
 
-    def post(self):
-        return "post"
-
-    #@token_required
-    def get(self):
+    @token_required
+    def get(current_user, self):
         user_id = request.args.get('user_id')
         team_id = request.args.get('team_id')
         coach_id = request.args.get('coach_id')
@@ -343,30 +341,31 @@ class UsersCRUD(Resource):
                 user.password_hash = password_hash
             user.email = data['email']
 
-
-        if current_user.role.id == 3:
+        if current_user.role_id == 3:
             user.role_id = data['role']
 
         dataBase.session.commit()
 
-        return jsonify({'message' : 'User succesfully updated'})  
-    @token_required
-    def delete(current_user, self):
-
-        return "delete"
+        return jsonify({'message' : 'User succesfully updated'}) 
 
 class TeamCRUD(Resource):
-    def post(self):
-        data = request.get_json()
-        team_name = data['team_name']
 
-        new_team = Teams(id=None, team_name=team_name, coach_id=None)
-        dataBase.session.add(new_team)
-        dataBase.session.commit()
+    @token_required
+    def post(current_user, self):
+        if current_user.role_id >= 2:
+            data = request.get_json()
+            team_name = data['team_name']
 
-        return jsonify({'message' : 'Team created succesfully'})  
+            new_team = Teams(id=None, team_name=team_name, coach_id=None)
+            dataBase.session.add(new_team)
+            dataBase.session.commit()
 
-    def get(self):
+            return jsonify({'message' : 'Team created succesfully'})
+        else:
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')
+    
+    @token_required
+    def get(current_user, self):
         user_id = request.args.get('user_id')
         player_id = request.args.get("player_id")
         coach_id = request.args.get('coach_id')
@@ -382,82 +381,93 @@ class TeamCRUD(Resource):
             return serialize_list(teams)
         else:
             teams = Teams.query.all()
-            return serialize_list(teams)            
+            return serialize_list(teams)      
 
-    def put(self):
-        return "put"
+    @token_required
+    def patch(current_user, self):
+        if current_user.role_id >= 2:
+            data = request.get_json()
+            team_id = data['team_id']
+            team_name = data['team_name']
+            coach_id = data['coach_id']
 
-    def patch(self):
-        data = request.get_json()
-        team_id = data['team_id']
-        team_name = data['team_name']
-        coach_id = data['coach_id']
 
+            team = Teams.query.filter_by(id=team_id).first()
 
-        team = Teams.query.filter_by(id=team_id).first()
-
-        if team:
-            team.team_name = team_name
-            team.coach_id = coach_id
-            dataBase.session.commit()
-            return jsonify({'message' : 'Team updated succesfully'}) 
+            if team:
+                team.team_name = team_name
+                team.coach_id = coach_id
+                dataBase.session.commit()
+                return jsonify({'message' : 'Team updated succesfully'}) 
+            else:
+                return Response("{'message':'No team with such team_id found'}", status=500, mimetype='application/json')  
         else:
-            return jsonify({'message' : 'No team with such team_id found'})  
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')  
 
 
     def delete(self):
         return "delete"
 
 class CoachCRUD(Resource):
-    def post(self):
-        data = request.get_json()
-        user_id = data['user_id']
 
-        query = Coaches.query.filter_by(user_id=user_id).first()
-        if not query:
-            user = Users.query.filter_by(id=user_id).first()
-            if user:
-                user.role_id = 2
-                new_coach = Coaches(id = None, user_id=user_id)
-                dataBase.session.add(new_coach)
-                dataBase.session.commit()
-                return jsonify({'message' : 'User promoted to coach'})  
+    @token_required
+    def post(current_user, self):
+        if current_user.role_id >= 2:
+            data = request.get_json()
+            user_id = data['user_id']
+
+            query = Coaches.query.filter_by(user_id=user_id).first()
+            if not query:
+                user = Users.query.filter_by(id=user_id).first()
+                if user:
+                    user.role_id = 2
+                    new_coach = Coaches(id = None, user_id=user_id)
+                    dataBase.session.add(new_coach)
+                    dataBase.session.commit()
+                    return jsonify({'message' : 'User promoted to coach'})  
+                else:
+                    return Response("{'message':'No user with such user_id found'}", status=500, mimetype='application/json')  
             else:
-                return jsonify({'message' : 'No user with such user_id found'})
+                return Response("{'message':'User is allready a coach'}", status=200, mimetype='application/json')  
         else:
-            return jsonify({'message' : 'User is allready a coach'})  
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json') 
 
-    def get(self):
+    @token_required
+    def get(current_user, self):
         user_id = request.args.get('user_id')
         
         if user_id is not None:
             coach = Coaches.query.filter_by(user_id=user_id).first()
             return coach.json()
 
-    def delete(self):
-        user_id = request.args.get('user_id')
-        coach_id = request.args.get('coach_id')
+    @token_required
+    def delete(current_user, self):
+        if current_user.role_id >= 2:
+            user_id = request.args.get('user_id')
+            coach_id = request.args.get('coach_id')
 
-        if user_id is not None:
-            coach = Coaches.query.filter_by(user_id=user_id).first()
-            user = Users.query.filter_by(id = user_id).first()
-        elif coach_id is not None:
-            coach = Coaches.query.filter_by(id=coach_id).first()
-            user = Users.quert.filter_by(id = coach.user_id).first()
-        else:
-            coach = None
+            if user_id is not None:
+                coach = Coaches.query.filter_by(user_id=user_id).first()
+                user = Users.query.filter_by(id = user_id).first()
+            elif coach_id is not None:
+                coach = Coaches.query.filter_by(id=coach_id).first()
+                user = Users.quert.filter_by(id = coach.user_id).first()
+            else:
+                coach = None
 
-        if coach:
-            teams = Teams.query.filter_by(coach_id = coach.id).all()
-            user.role_id = 1
-            for t in teams:
-                teams.coach_id = None
-            query = Coaches.query.filter_by(id=coach.id)
-            query.delete()
-            dataBase.session.commit()
-            return jsonify({'message' : 'Coach deleted'})             
+            if coach:
+                teams = Teams.query.filter_by(coach_id = coach.id).all()
+                user.role_id = 1
+                for t in teams:
+                    teams.coach_id = None
+                query = Coaches.query.filter_by(id=coach.id)
+                query.delete()
+                dataBase.session.commit()
+                return jsonify({'message' : 'Coach deleted'})             
+            else:
+                return Response("{'message':'Coach not found'}", status=500, mimetype='application/json')
         else:
-            return jsonify({'message' : 'Coach not found'})  
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')           
 
 class PlayerCRUD(Resource):
     def post(self):
