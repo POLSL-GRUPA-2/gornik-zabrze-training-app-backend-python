@@ -19,9 +19,6 @@ import os
 from json import JSONEncoder
 from datetime import datetime, timedelta
 
-
-#dup
-
 app = Flask(__name__)
 api = Api(app)
 CORS(app, supports_credentials=True)
@@ -468,6 +465,8 @@ class PlayerCRUD(Resource):
 
     def get(self):
         user_id = request.args.get('user_id')
+        team_id = request.args.get('team_id')
+
 
         if user_id is not None:
             player = Players.query.filter_by(user_id=user_id).first()
@@ -475,6 +474,11 @@ class PlayerCRUD(Resource):
                 return player.json()
             else:
                 return jsonify({'message' : 'Player with such user_id doesn\'t exist'}) 
+        elif team_id is not None:
+            players = Players.query.join(Players.teams).filter_by(team_id=team_id).all()
+            print(players)
+            return serialize_list(players)
+
 
     def put(self):
         return "put"
@@ -850,9 +854,6 @@ class Account(Resource):
     def get(current_user, self):
         return current_user.json()
 
-#DEBUG
-class Check_role(Resource):
-    pass
 
 api.add_resource(UsersCRUD, '/user')
 api.add_resource(CoachCRUD, '/coach')
@@ -869,13 +870,12 @@ api.add_resource(Logout, '/logout') #get
 api.add_resource(Account, '/account') #get
 api.add_resource(TeamAssignment, '/team_assignment')
 
-api.add_resource(Check_role, '/role')
 
 
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
