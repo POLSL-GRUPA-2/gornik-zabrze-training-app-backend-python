@@ -364,7 +364,14 @@ class UsersCRUD(Resource):
 
 class TeamCRUD(Resource):
     def post(self):
-        return "post"
+        data = request.get_json()
+        team_name = data['team_name']
+
+        new_team = Teams(id=None, team_name=team_name, coach_id=None)
+        dataBase.session.add(new_team)
+        dataBase.session.commit()
+
+        return jsonify({'message' : 'Team created succesfully'})  
 
     def get(self):
         user_id = request.args.get('user_id')
@@ -388,8 +395,22 @@ class TeamCRUD(Resource):
         return "put"
 
     def patch(self):
+        data = request.get_json()
+        team_id = data['team_id']
+        team_name = data['team_name']
+        coach_id = data['coach_id']
 
-        return "patch"
+
+        team = Teams.query.filter_by(id=team_id).first()
+
+        if team:
+            team.team_name = team_name
+            team.coach_id = coach_id
+            dataBase.session.commit()
+            return jsonify({'message' : 'Team updated succesfully'}) 
+        else:
+            return jsonify({'message' : 'No team with such team_id found'})  
+
 
     def delete(self):
         return "delete"
