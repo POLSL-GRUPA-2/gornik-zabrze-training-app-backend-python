@@ -7,8 +7,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import asc, desc, func
 import xml.etree.ElementTree as XMLconfig
 import uuid
-from sqlalchemy.orm import backref
+from sqlalchemy.orm import backref, query
 from sqlalchemy.sql.elements import True_
+from sqlalchemy.sql.functions import user
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
@@ -323,7 +324,6 @@ class UsersCRUD(Resource):
         team_id = request.args.get('team_id')
         coach_id = request.args.get('coach_id')
 
-
         if user_id is not None:
             user = Users.query.filter_by(id=user_id).first()
             return user.json()
@@ -389,6 +389,7 @@ class TeamCRUD(Resource):
         return "put"
 
     def patch(self):
+
         return "patch"
 
     def delete(self):
@@ -398,10 +399,20 @@ class CoachCRUD(Resource):
     def post(self):
         data = request.get_json()
         user_id = data['user_id']
-        team_id = data['team_id']
 
-        new_coach = Coaches(user_id=user_id, team_id=team_id)
-
+        query = Coaches.query.filter_by(user_id=user_id).first()
+        if not query:
+            user = Users.query.filter_by(id=user_id).first()
+            if user:
+                user.role_id = 2
+                new_coach = Coaches(id = None, user_id=user_id)
+                dataBase.session.add(new_coach)
+                dataBase.session.commit()
+                return jsonify({'message' : 'User promoted to coach'})  
+            else:
+                return jsonify({'message' : 'No user with such user_id found'})
+        else:
+            return jsonify({'message' : 'User is allready a coach'})  
 
     def get(self):
         user_id = request.args.get('user_id')
@@ -410,14 +421,32 @@ class CoachCRUD(Resource):
             coach = Coaches.query.filter_by(user_id=user_id).first()
             return coach.json()
 
-    def put(self):
-        return "put"
-
-    def patch(self):
-        return "patch"
-
     def delete(self):
-        return "delete"
+        user_id = request.args.get('user_id')
+        coach_id = request.args.get('coach_id')
+
+        if user_id is not None:
+            coach = Coaches.query.filter_by(user_id=user_id).first()
+            user = Users.query.filter_by(id = user_id).first()
+        elif coach_id is not None:
+            coach = Coaches.query.filter_by(id=coach_id).first()
+            user = Users.quert.filter_by(id = coach.user_id).first()
+        else:
+            coach = None
+
+        if coach:
+            teams = Teams.query.filter_by(coach_id = coach.id).all()
+            user.role_id = 1
+            for t in teams:
+                teams.coach_id = None
+            query = Coaches.query.filter_by(id=coach.id)
+            query.delete()
+            dataBase.session.commit()
+            return jsonify({'message' : 'Coach deleted'})             
+        else:
+            return jsonify({'message' : 'Coach not found'})  
+
+        
 
 class PlayerCRUD(Resource):
     def post(self):
@@ -497,7 +526,7 @@ class PersonalTasksCRUD(Resource):
     @token_required
     def patch(current_user, self):
 
-        data = request.json
+        data = request.get_json()
 
         task = PersonalTasks.query.filter_by(id=data['id']).first()
         if current_user.role.id >=  2:
@@ -808,7 +837,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
