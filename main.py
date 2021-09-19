@@ -738,8 +738,19 @@ class TeamMessageCRUD(Resource):
 
         if valid:
             if team_id is not None:
-                messages = TeamMessages.query.filter(TeamMessages.team_id == team_id).order_by(TeamMessages.time_stamp).all()
-            
+                messages = dataBase.session.query(Users.first_name, Users.last_name, TeamMessages.message, TeamMessages.sender_id, TeamMessages.time_stamp).filter(TeamMessages.team_id == team_id, Users.id == TeamMessages.sender_id).order_by(TeamMessages.time_stamp).all()
+
+                messes = []
+
+                for message in messages:
+                    mess = {}
+                    mess['first_name'] = message[0]
+                    mess['last_name'] = message[1]
+                    mess['message'] = message[2]
+                    mess['sender_id'] = message[3]
+                    mess['date'] = str(message[4])
+                    messes.append(mess)
+
             return serialize_list(messages)
         else:
             return jsonify({'message' : 'Don\'t be retard'})    
