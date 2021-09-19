@@ -333,8 +333,9 @@ class UsersCRUD(Resource):
             user.first_name = data['first_name']
             user.last_name = data['last_name']
             if 'password' in data:
-                password_hash = generate_password_hash(data['password'], method='sha256')
-                user.password_hash = password_hash
+                if data['password'] is not None:
+                    password_hash = generate_password_hash(data['password'], method='sha256')
+                    user.password_hash = password_hash
             user.email = data['email']
 
         if current_user.role_id == 3:
