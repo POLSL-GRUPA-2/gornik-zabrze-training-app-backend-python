@@ -311,7 +311,7 @@ class UsersCRUD(Resource):
             user = Users.query.filter_by(id=user_id).first()
             return user.json()
         elif team_id is not None:
-            users = Users.query.join(Players.user).join(Teams.players).filter_by(team_id=team_id).all()
+            users = Users.query.join(Users.player).join(Players.teams).filter_by(team_id=team_id).all()
             return serialize_list(users)  
         elif coach_id is not None:
             user = Users.query.join(Users.coach).filter_by(id=coach_id).first()
@@ -907,7 +907,7 @@ api.add_resource(TeamAssignment, '/team_assignment')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
