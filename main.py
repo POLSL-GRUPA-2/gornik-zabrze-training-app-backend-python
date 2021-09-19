@@ -461,7 +461,21 @@ class CoachCRUD(Resource):
 
 class PlayerCRUD(Resource):
     def post(self):
-        return "post"
+
+        data = request.get_json()
+        user_id = data['user_id']
+
+        query = Players.query.filter_by(user_id=user_id).first()
+        if not query:
+            if user:
+                new_coach = Players(id = None, user_id=user_id)
+                dataBase.session.add(new_coach)
+                dataBase.session.commit()
+                return jsonify({'message' : 'User promoted to player'})  
+            else:
+                return jsonify({'message' : 'No user with such user_id found'})
+        else:
+            return jsonify({'message' : 'User is allready a player'})  
 
     def get(self):
         user_id = request.args.get('user_id')
