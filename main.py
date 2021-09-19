@@ -320,7 +320,6 @@ class UsersCRUD(Resource):
             users = Users.query.all()
             return serialize_list(users)   
 
-
     @token_required
     def patch(current_user, self):
         data = request.json
@@ -907,7 +906,7 @@ api.add_resource(TeamAssignment, '/team_assignment')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0')
+    #app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
