@@ -744,9 +744,12 @@ class TeamMessageCRUD(Resource):
         message = data['message']
 
         valid = False
-        for t in current_user.player[0].teams:
-            if t.team.id == int(team_id):
-                valid = True
+        if current_user.role_id != 2:
+            for t in current_user.player[0].teams:
+                if t.team.id == int(team_id):
+                    valid = True
+        else:
+            valid = True
         
         if valid:
             if len(message) > 2049:
