@@ -338,7 +338,8 @@ class UsersCRUD(Resource):
             user.email = data['email']
 
         if current_user.role_id == 3:
-            user.role_id = data['role']
+            if 'role' in data:
+                user.role_id = data['role']
 
         dataBase.session.commit()
 
