@@ -561,7 +561,7 @@ class TeamTasksCRUD(Resource):
         data = request.get_json()
         date = datetime.strptime(data['task_date'], '%Y-%m-%d %H:%M:%S')
 
-        new_task = TeamTasks(id=None, task_date=date, coach_id=data['coach_id'], player_id=data['player_id'], description=data['description'], done=False)
+        new_task = TeamTasks(id=None, task_date=date, team_id=data['team_id'], description=data['description'], done=False)
         dataBase.session.add(new_task)
         dataBase.session.commit()
         return jsonify({'message' : 'Task succesfully added'})  
