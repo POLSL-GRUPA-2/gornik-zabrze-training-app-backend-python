@@ -457,7 +457,10 @@ class PlayerCRUD(Resource):
 
         if user_id is not None:
             player = Players.query.filter_by(user_id=user_id).first()
-            return player.json()
+            if player:
+                return player.json()
+            else:
+                return jsonify({'message' : 'Player with such user_id doesn\'t exist'}) 
 
     def put(self):
         return "put"
