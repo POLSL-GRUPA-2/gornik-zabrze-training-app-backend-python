@@ -153,7 +153,6 @@ class Players(dataBase.Model, Serializable):
             'id': self.id,
             'user_id': self.user_id,
         }
-
     parser = reqparse.RequestParser()
     parser.add_argument('id')
     parser.add_argument('team_id')
@@ -446,8 +445,6 @@ class CoachCRUD(Resource):
         else:
             return jsonify({'message' : 'Coach not found'})  
 
-        
-
 class PlayerCRUD(Resource):
     def post(self):
         return "post"
@@ -683,9 +680,22 @@ class MessageCRUD(Resource):
 
         if current_user.id == reciever_id or current_user.id == sender_id:
             if sender_id is not None and reciever_id is not None:
-                messages = Messages.query.filter(Messages.reciever_id.in_([reciever_id, sender_id]), Messages.sender_id.in_([reciever_id, sender_id])).order_by(Messages.time_stamp).all()
+                messages = dataBase.session.query(Users.first_name, Users.last_name, Messages.message, Messages.sender_id, Messages.reciever_id, Messages.time_stamp).filter(Messages.reciever_id.in_([reciever_id, sender_id]), Messages.sender_id.in_([reciever_id, sender_id]), Users.id == Messages.sender_id).order_by(Messages.time_stamp).all()
+                
+                messes = []
+
+                for message in messages:
+                    mess = {}
+                    mess['first_name'] = message[0]
+                    mess['last_name'] = message[1]
+                    mess['message'] = message[2]
+                    mess['sender_id'] = message[3]
+                    mess['reciever_id'] = message[4]
+                    mess['date'] = str(message[5])
+                    messes.append(mess)
             
-            return serialize_list(messages)
+            return jsonify(messes)
+
         else:
             return jsonify({'message' : 'Don\'t be retard'})  
         
@@ -840,7 +850,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
