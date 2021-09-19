@@ -396,7 +396,12 @@ class TeamCRUD(Resource):
 
 class CoachCRUD(Resource):
     def post(self):
-        return "post"
+        data = request.get_json()
+        user_id = data['user_id']
+        team_id = data['team_id']
+
+        new_coach = Coaches(user_id=user_id, team_id=team_id)
+
 
     def get(self):
         user_id = request.args.get('user_id')
@@ -697,16 +702,20 @@ class TeamMessageCRUD(Resource):
         else:
             return jsonify({'message' : 'Don\'t be retard'})    
 
-class TeamAssign(Resource):
+class TeamAssignment(Resource):
 
     def post(self):
         data = request.get_json()
         team_id = data['team_id']
         player_id = data['player_id']
-
-        new_assigment = TeamsPlayersAssociations(team_id=team_id, player_id=player_id)
-        dataBase.session.add(new_assigment)
-        dataBase.session.commit()
+        query = TeamsPlayersAssociations.query.filter_by(player_id=player_id, team_id=team_id)
+        if not query.first():
+            new_assigment = TeamsPlayersAssociations(team_id=team_id, player_id=player_id, role=None)
+            dataBase.session.add(new_assigment)
+            dataBase.session.commit()
+            return jsonify({'message' : 'Assigment added'})  
+        else:
+            return jsonify({'message' : 'Assigment already exists'})  
 
     def delete(self):
         player_id = request.args.get('player_id')
@@ -789,7 +798,7 @@ api.add_resource(Login, '/login') #post
 api.add_resource(Register, '/register') #post
 api.add_resource(Logout, '/logout') #get
 api.add_resource(Account, '/account') #get
-
+api.add_resource(TeamAssignment, '/team_assignment')
 
 #Debug
 api.add_resource(Dupa, '/')
@@ -799,7 +808,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
