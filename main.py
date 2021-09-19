@@ -1,23 +1,16 @@
-from flask import Flask, json, request, jsonify
-from flask.globals import session
+from flask import Flask, request, jsonify
 from flask.helpers import make_response
-from flask.signals import request_started
 from flask_restful import Resource, Api, reqparse
 from flask import Response
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import asc, desc, func
-import xml.etree.ElementTree as XMLconfig
+from sqlalchemy import func
 import uuid
-from sqlalchemy.orm import backref, query
-from sqlalchemy.sql.elements import True_
 from sqlalchemy.sql.functions import user
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
 from functools import wraps
 from flask_cors import CORS
-import os
-from json import JSONEncoder
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
