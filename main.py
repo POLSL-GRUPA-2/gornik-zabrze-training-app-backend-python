@@ -335,7 +335,7 @@ class UsersCRUD(Resource):
             if data['last_name'] is not None:    
                 user.last_name = data['last_name']
             if 'password' in data:
-                if data['password'] is not None:
+                if data['password'] != '' and data['password'] is not None:
                     password_hash = generate_password_hash(data['password'], method='sha256')
                     user.password_hash = password_hash
 
