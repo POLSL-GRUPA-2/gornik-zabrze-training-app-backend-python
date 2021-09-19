@@ -306,6 +306,7 @@ class UsersCRUD(Resource):
         user_id = request.args.get('user_id')
         team_id = request.args.get('team_id')
         coach_id = request.args.get('coach_id')
+        player_id = request.args.get('player_id')
 
         if user_id is not None:
             user = Users.query.filter_by(id=user_id).first()
@@ -316,9 +317,12 @@ class UsersCRUD(Resource):
         elif coach_id is not None:
             user = Users.query.join(Users.coach).filter_by(id=coach_id).first()
             return user.json()
+        elif player_id is not None:
+            user = Users.query.join(Users.player).filter_by(id=player_id).first()
+            return user.json()
         else:
             users = Users.query.all()
-            return serialize_list(users)   
+            return serialize_list(users)
 
     @token_required
     def patch(current_user, self):
@@ -487,7 +491,6 @@ class PlayerCRUD(Resource):
     def get(current_user, self):
         user_id = request.args.get('user_id')
         team_id = request.args.get('team_id')
-
 
         if user_id is not None:
             player = Players.query.filter_by(user_id=user_id).first()
