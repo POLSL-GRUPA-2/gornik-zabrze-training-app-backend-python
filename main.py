@@ -321,6 +321,7 @@ class UsersCRUD(Resource):
     def get(self):
         user_id = request.args.get('user_id')
         team_id = request.args.get('team_id')
+        coach_id = request.args.get('coach_id')
 
 
         if user_id is not None:
@@ -329,6 +330,9 @@ class UsersCRUD(Resource):
         elif team_id is not None:
             users = Users.query.join(Players.user).join(Teams.players).filter_by(team_id=team_id).all()
             return serialize_list(users)  
+        elif coach_id is not None:
+            user = Users.query.join(Users.coach).filter_by(id=coach_id).first()
+            return user.json()
         else:
             users = Users.query.all()
             return serialize_list(users)   
@@ -396,15 +400,10 @@ class CoachCRUD(Resource):
 
     def get(self):
         user_id = request.args.get('user_id')
-        coach_id = request.args.get('coach_id')
         
         if user_id is not None:
             coach = Coaches.query.filter_by(user_id=user_id).first()
             return coach.json()
-        if coach_id is not None:
-            user = Users.query.join(Users.coach).filter_by(id=coach_id).first()
-            return user.json()
-
 
     def put(self):
         return "put"
@@ -506,10 +505,10 @@ class PersonalTasksCRUD(Resource):
         dataBase.session.commit()
 
         return jsonify({'message' : 'Task succesfully updated'})  
-
+        
     @token_required
     def delete(current_user, self):
-        if current_user.role < 2:
+        if current_user.role_id < 2:
             return jsonify({'message' : 'Access denied'}) 
         id = request.args.get('id')
         query = PersonalTasks.query.filter_by(id=id)
@@ -631,8 +630,6 @@ class MessageCRUD(Resource):
             messages_recv = dataBase.session.query(Messages.sender_id, func.max(Messages.time_stamp)).filter(Messages.reciever_id == user_id).group_by(Messages.sender_id).order_by(func.max(Messages.time_stamp).desc()).all()
 
             messes = []
-
-
             for m in messages_recv:
                 mess = {}
 
@@ -699,6 +696,30 @@ class TeamMessageCRUD(Resource):
             return serialize_list(messages)
         else:
             return jsonify({'message' : 'Don\'t be retard'})    
+
+class TeamAssign(Resource):
+
+    def post(self):
+        data = request.get_json()
+        team_id = data['team_id']
+        player_id = data['player_id']
+
+        new_assigment = TeamsPlayersAssociations(team_id=team_id, player_id=player_id)
+        dataBase.session.add(new_assigment)
+        dataBase.session.commit()
+
+    def delete(self):
+        player_id = request.args.get('player_id')
+        team_id = request.args.get('team_id')
+
+        query = TeamsPlayersAssociations.query.filter_by(player_id=player_id, team_id=team_id)
+
+        if query.first():
+            query.delete()
+            dataBase.session.commit()
+            return jsonify({'message' : 'Assigment deleted'})  
+        else:
+            return jsonify({'message' : 'Assigment not found'})  
 
 
 class Login(Resource):
