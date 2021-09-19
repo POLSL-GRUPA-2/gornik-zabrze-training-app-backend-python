@@ -786,7 +786,7 @@ class TeamMessageCRUD(Resource):
                     mess['date'] = str(message[4])
                     messes.append(mess)
 
-            return serialize_list(messages)
+            return jsonify(messes)
         else:
             return jsonify({'message' : 'Don\'t be retard'})    
 
