@@ -470,24 +470,29 @@ class CoachCRUD(Resource):
             return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')           
 
 class PlayerCRUD(Resource):
-    def post(self):
 
-        data = request.get_json()
-        user_id = data['user_id']
+    @token_required
+    def post(current_user, self):
+        if current_user.role_id >= 2:
+            data = request.get_json()
+            user_id = data['user_id']
 
-        query = Players.query.filter_by(user_id=user_id).first()
-        if not query:
-            if user:
-                new_coach = Players(id = None, user_id=user_id, teams=[])
-                dataBase.session.add(new_coach)
-                dataBase.session.commit()
-                return jsonify({'message' : 'User promoted to player'})  
+            query = Players.query.filter_by(user_id=user_id).first()
+            if not query:
+                if user:
+                    new_coach = Players(id = None, user_id=user_id, teams=[])
+                    dataBase.session.add(new_coach)
+                    dataBase.session.commit()
+                    return jsonify({'message' : 'User promoted to player'})  
+                else:
+                    return Response("{'message':'User is allready a player'}", status=500, mimetype='application/json')
             else:
-                return jsonify({'message' : 'No user with such user_id found'})
+                return Response("{'message':'User is allready a player'}", status=200, mimetype='application/json')
         else:
-            return jsonify({'message' : 'User is allready a player'})  
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json') 
 
-    def get(self):
+    @token_required
+    def get(current_user, self):
         user_id = request.args.get('user_id')
         team_id = request.args.get('team_id')
 
@@ -497,24 +502,24 @@ class PlayerCRUD(Resource):
             if player:
                 return player.json()
             else:
-                return jsonify({'message' : 'Player with such user_id doesn\'t exist'}) 
+                return Response("{'message':'Player with such user_id doesn\'t exist'}", status=500, mimetype='application/json')
         elif team_id is not None:
             players = Players.query.join(Players.teams).filter_by(team_id=team_id).all()
             return serialize_list(players)
 
-
-    def put(self):
-        return "put"
-
     @token_required
-    def patch(current_user, self):
-        if current_user.role.id < 2:
-            return jsonify({'message' : 'Access denied'}) 
-        
-        return jsonify({'message' : 'Task succesfully added'})  
+    def delete(current_user, self):
+        if current_user.role_id < 2:
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')
+        player_id = request.args.get('player_id')
 
-    def delete(self):
-        return "delete"
+        player = Players.query.filter_by(id=player_id)
+        if player.first():
+            player.delete()
+            dataBase.session.commit()
+            return jsonify({'message':'Player succesfully deleted'})
+        else:
+            return Response("{'message':'No player with such id exists'}", status=500, mimetype='application/json')
 
 class PersonalTasksCRUD(Resource):
     @token_required
@@ -601,7 +606,7 @@ class TeamTasksCRUD(Resource):
     @token_required
     def post(current_user, self):
         if current_user.role_id < 2:
-            return jsonify({'message' : 'Access denied'}) 
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')
         data = request.get_json()
         date = datetime.strptime(data['task_date'], '%Y-%m-%d %H:%M:%S')
 
@@ -687,7 +692,7 @@ class MessageCRUD(Resource):
         reciever_id = data['reciever_id']
         message = data['message']
         if len(message) > 2049:
-            return jsonify({'message' : 'Message too long'})  
+            return Response("{'message':'Message too long'}", status=500, mimetype='application/json')    
         time_stamp = datetime.now()
 
         new_message = Messages(id=None, reciever_id=reciever_id, sender_id=sender_id, message=message, time_stamp=time_stamp)
@@ -763,7 +768,7 @@ class TeamMessageCRUD(Resource):
         
         if valid:
             if len(message) > 2049:
-                return jsonify({'message' : 'Message too long'})  
+                return Response("{'message':'Message too long'}", status=500, mimetype='application/json')  
             time_stamp = datetime.now()
 
             new_message = TeamMessages(id=None, team_id=team_id, sender_id=sender_id, message=message, time_stamp=time_stamp)
@@ -771,7 +776,7 @@ class TeamMessageCRUD(Resource):
             dataBase.session.commit()
             return jsonify({'message' : 'Message succesfully added'})  
         else:
-            return jsonify({'message' : 'Don\'t be retard'})  
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')  
 
     @token_required
     def get(current_user, self):
@@ -803,11 +808,13 @@ class TeamMessageCRUD(Resource):
 
             return jsonify(messes)
         else:
-            return jsonify({'message' : 'Don\'t be retard'})    
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')   
 
 class TeamAssignment(Resource):
-
-    def post(self):
+    @token_required
+    def post(current_user, self):
+        if current_user.role_id < 2:
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')
         data = request.get_json()
         team_id = data['team_id']
         player_id = data['player_id']
@@ -818,9 +825,12 @@ class TeamAssignment(Resource):
             dataBase.session.commit()
             return jsonify({'message' : 'Assigment added'})  
         else:
-            return jsonify({'message' : 'Assigment already exists'})  
-
-    def delete(self):
+            return Response("{'message':'Assigment already exists'}", status=500, mimetype='application/json')  
+                        
+    @token_required
+    def delete(current_user, self):
+        if current_user.role_id < 2:
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')
         player_id = request.args.get('player_id')
         team_id = request.args.get('team_id')
 
@@ -831,7 +841,7 @@ class TeamAssignment(Resource):
             dataBase.session.commit()
             return jsonify({'message' : 'Assigment deleted'})  
         else:
-            return jsonify({'message' : 'Assigment not found'})  
+            return Response("{'message':'Assigment not found'}", status=500, mimetype='application/json')
 
 class Login(Resource):
     def post(self):
