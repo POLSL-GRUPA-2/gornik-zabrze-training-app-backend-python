@@ -490,7 +490,6 @@ class PlayerCRUD(Resource):
                 return jsonify({'message' : 'Player with such user_id doesn\'t exist'}) 
         elif team_id is not None:
             players = Players.query.join(Players.teams).filter_by(team_id=team_id).all()
-            print(players)
             return serialize_list(players)
 
 
@@ -771,7 +770,7 @@ class TeamMessageCRUD(Resource):
             if t.team.id == int(team_id):
                 valid = True
 
-        if valid:
+        if valid or current_user.role_id == 2:
             if team_id is not None:
                 messages = dataBase.session.query(Users.first_name, Users.last_name, TeamMessages.message, TeamMessages.sender_id, TeamMessages.time_stamp).filter(TeamMessages.team_id == team_id, Users.id == TeamMessages.sender_id).order_by(TeamMessages.time_stamp).all()
 
