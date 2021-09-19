@@ -330,13 +330,17 @@ class UsersCRUD(Resource):
 
         user = Users.query.filter_by(id=data['id']).first()
         if current_user.id == user.id or current_user.role.id == 3:
-            user.first_name = data['first_name']
-            user.last_name = data['last_name']
+            if data['first_name'] is not None:
+                user.first_name = data['first_name']
+            if data['last_name'] is not None:    
+                user.last_name = data['last_name']
             if 'password' in data:
                 if data['password'] is not None:
                     password_hash = generate_password_hash(data['password'], method='sha256')
                     user.password_hash = password_hash
-            user.email = data['email']
+
+            if data['email'] is not None:
+                user.email = data['email']
 
         if current_user.role_id == 3:
             if 'role' in data:
