@@ -505,7 +505,7 @@ class PersonalTasksCRUD(Resource):
         dataBase.session.commit()
 
         return jsonify({'message' : 'Task succesfully updated'})  
-        
+
     @token_required
     def delete(current_user, self):
         if current_user.role_id < 2:
@@ -799,7 +799,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0')
+    #app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
