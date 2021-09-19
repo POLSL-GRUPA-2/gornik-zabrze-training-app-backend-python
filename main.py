@@ -396,10 +396,15 @@ class CoachCRUD(Resource):
 
     def get(self):
         user_id = request.args.get('user_id')
+        coach_id = request.args.get('coach_id')
         
         if user_id is not None:
             coach = Coaches.query.filter_by(user_id=user_id).first()
             return coach.json()
+        if coach_id is not None:
+            user = Users.query.join(Users.coach).filter_by(id=coach_id).first()
+            return user.json()
+
 
     def put(self):
         return "put"
@@ -773,7 +778,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
