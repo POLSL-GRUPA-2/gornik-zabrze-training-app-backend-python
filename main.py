@@ -308,10 +308,6 @@ def token_required(f):
 
 #RESOURCES
 
-class Dupa(Resource):
-    def get(self):
-        return "spierdlaj"
-
 class UsersCRUD(Resource):
 
     def post(self):
@@ -804,7 +800,6 @@ class TeamAssignment(Resource):
         else:
             return jsonify({'message' : 'Assigment not found'})  
 
-
 class Login(Resource):
     def post(self):
         
@@ -874,8 +869,6 @@ api.add_resource(Logout, '/logout') #get
 api.add_resource(Account, '/account') #get
 api.add_resource(TeamAssignment, '/team_assignment')
 
-#Debug
-api.add_resource(Dupa, '/')
 api.add_resource(Check_role, '/role')
 
 
