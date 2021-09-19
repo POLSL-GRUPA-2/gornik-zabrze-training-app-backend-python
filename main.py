@@ -623,18 +623,21 @@ class MessageCRUD(Resource):
 
         if user_id is not None:
 
-            messages_recv = dataBase.session.query(Users.first_name, Users.last_name, Messages.message, Messages.sender_id, func.max(Messages.time_stamp)).filter(Messages.reciever_id == user_id, Users.id == Messages.sender_id ).group_by(Messages.sender_id).order_by(func.max(Messages.time_stamp).desc()).all()
+            messages_recv = dataBase.session.query(Messages.sender_id, func.max(Messages.time_stamp)).filter(Messages.reciever_id == user_id).group_by(Messages.sender_id).order_by(func.max(Messages.time_stamp).desc()).all()
 
-            print(messages_recv)
             messes = []
+
 
             for m in messages_recv:
                 mess = {}
-                mess['first_name'] = m[0]
-                mess['last_name'] = m[1]
-                mess['message'] = m[2]
-                mess['from_id'] = m[3]
-                mess['date'] = str(m[4])
+
+                message = dataBase.session.query(Users.first_name, Users.last_name, Messages.message, Messages.sender_id, Messages.time_stamp).filter(Messages.sender_id == m[0], Messages.time_stamp == m[1], Users.id == m[0]).group_by(Messages.sender_id).order_by(Messages.time_stamp.desc()).first()
+
+                mess['first_name'] = message[0]
+                mess['last_name'] = message[1]
+                mess['message'] = message[2]
+                mess['from_id'] = message[3]
+                mess['date'] = str(message[4])
                 messes.append(mess)
 
             return jsonify(messes)
