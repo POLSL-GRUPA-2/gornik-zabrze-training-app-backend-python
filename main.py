@@ -896,10 +896,10 @@ api.add_resource(TeamTasksCRUD, '/team_task')
 api.add_resource(MessageCRUD, '/message')
 api.add_resource(TeamMessageCRUD, '/team_message')
 
-api.add_resource(Login, '/login') #post
-api.add_resource(Register, '/register') #post
-api.add_resource(Logout, '/logout') #get
-api.add_resource(Account, '/account') #get
+api.add_resource(Login, '/login')
+api.add_resource(Register, '/register')
+api.add_resource(Logout, '/logout')
+api.add_resource(Account, '/account')
 api.add_resource(TeamAssignment, '/team_assignment')
 
 
