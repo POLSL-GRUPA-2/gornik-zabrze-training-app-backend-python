@@ -766,11 +766,14 @@ class TeamMessageCRUD(Resource):
         team_id = request.args.get('team_id')
 
         valid = False
-        for t in current_user.player[0].teams:
-            if t.team.id == int(team_id):
-                valid = True
+        if current_user.role_id != 2:
+            for t in current_user.player[0].teams:
+                if t.team.id == int(team_id):
+                    valid = True
+        else:
+            valid = True
 
-        if valid or current_user.role_id == 2:
+        if valid:
             if team_id is not None:
                 messages = dataBase.session.query(Users.first_name, Users.last_name, TeamMessages.message, TeamMessages.sender_id, TeamMessages.time_stamp).filter(TeamMessages.team_id == team_id, Users.id == TeamMessages.sender_id).order_by(TeamMessages.time_stamp).all()
 
