@@ -478,7 +478,7 @@ class PersonalTasksCRUD(Resource):
         if current_user.role_id < 2:
             return jsonify({'message' : 'Access denied'}) 
         data = request.get_json()
-        date = datetime.strptime(data['task_date'], '%Y-%m-%d %h:%m:%s')
+        date = datetime.strptime(data['task_date'], '%Y-%m-%d %H:%M:%S')
 
         new_task = PersonalTasks(id=None, task_date=date, coach_id=data['coach_id'], player_id=data['player_id'], description=data['description'], done=False)
         dataBase.session.add(new_task)
@@ -837,7 +837,7 @@ api.add_resource(Check_role, '/role')
 def main(*args, **kwargs):
     dataBase.create_all()
     #port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0')
+    #app.run(debug=True, host='0.0.0.0')
     
 
 if __name__ == '__main__':
