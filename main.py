@@ -879,8 +879,14 @@ class Register(Resource):
 
         hashed_password = generate_password_hash(data['password'], method='sha256')
 
-        new_user = Users(id=str(uuid.uuid4()), first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password, role_id=1)
+        id = str(uuid.uuid4())
+
+        new_user = Users(id=id, first_name=data['first_name'], last_name=data['last_name'], email=data['email'], password_hash=hashed_password, role_id=1)
+        
+        new_player = Players(id=None, user_id=id)
+
         dataBase.session.add(new_user)
+        dataBase.session.add(new_player)
         dataBase.session.commit()
 
         return jsonify({'message' : 'User created successfully'})
@@ -915,6 +921,7 @@ api.add_resource(TeamTasksCRUD, '/team_task')
 api.add_resource(MessageCRUD, '/message')
 api.add_resource(TeamMessageCRUD, '/team_message')
 api.add_resource(Get_Coaches_uid, '/secret')
+
 
 api.add_resource(Login, '/login')
 api.add_resource(Register, '/register')
