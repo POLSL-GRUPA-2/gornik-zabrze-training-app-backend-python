@@ -117,10 +117,10 @@ class Teams(dataBase.Model, Serializable):
     tasks = dataBase.relationship('TeamTasks', backref='team', lazy=True)
 
 
-    def __init__(self, id, coach_id, players):
+    def __init__(self, id, team_name, coach_id):
         self.id = id
+        self.team_name = team_name
         self.coach_id = coach_id
-        self.players = players
 
     parser = reqparse.RequestParser()
     parser.add_argument('id')
