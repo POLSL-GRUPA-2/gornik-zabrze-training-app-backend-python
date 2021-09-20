@@ -391,14 +391,16 @@ class TeamCRUD(Resource):
             data = request.get_json()
             team_id = data['team_id']
             team_name = data['team_name']
-            coach_id = data['coach_id']
-
+            user_id = data['user_id']
 
             team = Teams.query.filter_by(id=team_id).first()
 
             if team:
                 team.team_name = team_name
-                team.coach_id = coach_id
+
+                coach = Coaches.query.filter_by(user_id = user_id)
+
+                team.coach_id = coach.id
                 dataBase.session.commit()
                 return jsonify({'message' : 'Team updated succesfully'}) 
             else:
