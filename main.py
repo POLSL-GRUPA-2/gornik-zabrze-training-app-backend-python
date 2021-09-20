@@ -398,7 +398,7 @@ class TeamCRUD(Resource):
             if team:
                 team.team_name = team_name
 
-                coach = Coaches.query.filter_by(user_id = user_id)
+                coach = Coaches.query.filter_by(user_id = user_id).first()
 
                 team.coach_id = coach.id
                 dataBase.session.commit()
