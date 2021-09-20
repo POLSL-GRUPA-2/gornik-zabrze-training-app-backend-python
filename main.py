@@ -894,6 +894,15 @@ class Account(Resource):
     def get(current_user, self):
         return current_user.json()
 
+class Get_Coaches_uid(Resource):
+    @token_required
+    def get(current_user, self):
+        if current_user.role_id >= 2:
+            users = Users.query.join(Users.coach).all()
+            return serialize_list(users)
+        else:
+            return Response("{'message':'Permission denied'}", status=403, mimetype='application/json')    
+
 
 api.add_resource(UsersCRUD, '/user')
 api.add_resource(CoachCRUD, '/coach')
@@ -903,6 +912,7 @@ api.add_resource(PersonalTasksCRUD, '/personal_task')
 api.add_resource(TeamTasksCRUD, '/team_task')
 api.add_resource(MessageCRUD, '/message')
 api.add_resource(TeamMessageCRUD, '/team_message')
+api.add_resource(Get_Coaches_uid, '/secret')
 
 api.add_resource(Login, '/login')
 api.add_resource(Register, '/register')
